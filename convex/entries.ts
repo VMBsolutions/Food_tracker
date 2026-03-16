@@ -1,12 +1,12 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { getAuthUserId } from '@convex-dev/auth/server';
 
 export const getByDate = query({
   args: { date: v.string() },
   handler: async (ctx, { date }) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return [];
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+    const userId = identity.subject;
     return ctx.db
       .query('entries')
       .withIndex('by_user_date', q => q.eq('userId', userId).eq('date', date))
@@ -17,8 +17,9 @@ export const getByDate = query({
 export const getAll = query({
   args: {},
   handler: async ctx => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return [];
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+    const userId = identity.subject;
     return ctx.db
       .query('entries')
       .filter(q => q.eq(q.field('userId'), userId))
@@ -47,8 +48,9 @@ export const add = mutation({
     date: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error('Not authenticated');
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error('Not authenticated');
+    const userId = identity.subject;
     return ctx.db.insert('entries', {
       userId,
       ...args,
@@ -60,8 +62,9 @@ export const add = mutation({
 export const remove = mutation({
   args: { entryId: v.id('entries') },
   handler: async (ctx, { entryId }) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error('Not authenticated');
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error('Not authenticated');
+    const userId = identity.subject;
     const entry = await ctx.db.get(entryId);
     if (!entry || entry.userId !== userId) throw new Error('Not found');
     await ctx.db.delete(entryId);

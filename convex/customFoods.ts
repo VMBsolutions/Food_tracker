@@ -1,12 +1,12 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { getAuthUserId } from '@convex-dev/auth/server';
 
 export const list = query({
   args: {},
   handler: async ctx => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return [];
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+    const userId = identity.subject;
     return ctx.db
       .query('customFoods')
       .withIndex('by_user', q => q.eq('userId', userId))
@@ -30,8 +30,9 @@ export const add = mutation({
     emoji: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error('Not authenticated');
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error('Not authenticated');
+    const userId = identity.subject;
     return ctx.db.insert('customFoods', { userId, ...args });
   },
 });
@@ -53,8 +54,9 @@ export const update = mutation({
     emoji: v.optional(v.string()),
   },
   handler: async (ctx, { id, ...updates }) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error('Not authenticated');
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error('Not authenticated');
+    const userId = identity.subject;
     const food = await ctx.db.get(id);
     if (!food || food.userId !== userId) throw new Error('Not found');
     await ctx.db.patch(id, updates);
@@ -64,8 +66,9 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id('customFoods') },
   handler: async (ctx, { id }) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error('Not authenticated');
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error('Not authenticated');
+    const userId = identity.subject;
     const food = await ctx.db.get(id);
     if (!food || food.userId !== userId) throw new Error('Not found');
     await ctx.db.delete(id);

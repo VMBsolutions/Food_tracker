@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import { LayoutDashboard, History, UtensilsCrossed, Leaf, Sparkles, LogOut } from 'lucide-react';
-import { useAuthActions } from '@convex-dev/auth/react';
+import { useClerk } from '@clerk/react';
 import { Dashboard } from './pages/Dashboard';
 import { History as HistoryPage } from './pages/History';
 import { FoodDatabase } from './pages/FoodDatabase';
@@ -9,7 +9,7 @@ import { AuthGate } from './components/AuthGate';
 import './styles/global.css';
 
 function AppLayout() {
-  const { signOut } = useAuthActions();
+  const { signOut } = useClerk();
 
   return (
     <div className="app-layout">
