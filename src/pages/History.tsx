@@ -185,7 +185,7 @@ export function History() {
                   fontSize: 13,
                   padding: '8px 14px',
                 }}
-                formatter={(value: number) => [`${value} kcal`, 'Calories']}
+                formatter={(value) => [`${value ?? 0} kcal`, 'Calories']}
               />
               <Area
                 type="monotone"

@@ -62,7 +62,7 @@ export function WeeklyChart() {
                 padding: '8px 14px',
                 boxShadow: 'var(--shadow-lg)',
               }}
-              formatter={(value: number) => [`${value} kcal`, 'Calories']}
+              formatter={(value) => [`${value ?? 0} kcal`, 'Calories']}
               cursor={{ fill: 'rgba(143, 174, 139, 0.08)' }}
             />
             <Bar dataKey="calories" radius={[6, 6, 0, 0]} maxBarSize={40}>
